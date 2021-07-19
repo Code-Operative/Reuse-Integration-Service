@@ -1,0 +1,25 @@
+{
+  "name": "reuse-integration-service",
+  "version": "1.0.0",
+  "description": "integration service for reuse-home",
+  "main": "index.js",
+  "scripts": {
+    "test": "test",
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Code-Operative/Reuse-Integration-Service.git"
+  },
+  "author": "John Evans",
+  "license": "GPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/Code-Operative/Reuse-Integration-Service/issues"
+  },
+  "homepage": "https://github.com/Code-Operative/Reuse-Integration-Service#readme",
+  "dependencies": {
+    "@hapi/hapi": "^20.1.5",
+    "dotenv": "^10.0.0",
+    "massive": "^6.10.0"
+  }
+}

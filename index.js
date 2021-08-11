@@ -1,4 +1,6 @@
 const init = async () => {
+    const dotenv = require('dotenv');
+    dotenv.config();
 
     const Hapi = require('@hapi/hapi');
 
@@ -8,9 +10,11 @@ const init = async () => {
     });
 
     const {linkRoutes} = require('./routes/link');
+    const {testRoutes} = require('./routes/test');
 
     const routes = [
-        ...linkRoutes
+        ...linkRoutes,
+        ...testRoutes
     ];
 
     server.route(routes);

@@ -21,6 +21,7 @@
     "@hapi/hapi": "^20.1.5",
     "dotenv": "^10.0.0",
     "ebay-oauth-nodejs-client": "^1.2.1",
+    "luxon": "^2.0.2",
     "massive": "^6.10.0"
   }
 }

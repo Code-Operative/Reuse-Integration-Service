@@ -1,10 +1,9 @@
 const {checkEbayLink, createEbayLink} = require('../queries/ebay');
 
-
 const linkRoutes = [
     {
         method: 'GET',
-        path: '/link/ebay/{email}',
+        path: '/link/ebay/{sellerID}',
         config: {
             cors: {
                 origin: ['*'],
@@ -12,9 +11,9 @@ const linkRoutes = [
             }
         },
         handler: async(request)=> {
-            const {email} = request.params;
+            const {sellerID} = request.params;
 
-            const result = await checkEbayLink(email);
+            const result = await checkEbayLink(sellerID);
 
             return result;
         }
@@ -29,19 +28,9 @@ const linkRoutes = [
             }
         },
         handler: async(request)=> {
-            const {sellerInfo, ebayInfo} = request.payload;
+            const {sellerID, ebayOAuthCode} = request.payload;
 
-            let result;
-
-            let seller = await getSeller(sellerInfo);
-            if(!seller)
-                seller = await createSeller(sellerInfo);
-
-            let ebayAccount = await getEbayAccount(ebayInfo);
-            if(!ebayAccount)
-               result = await createEbayAccount(ebayInfo, sellerInfo);
-            else
-                result = {success: false, message: "ebay account already linked to this seller"};
+            const result = await createEbayLink(sellerID, ebayOAuthCode);
 
             return result;
         }

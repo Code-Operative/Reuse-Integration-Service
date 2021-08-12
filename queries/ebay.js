@@ -20,11 +20,9 @@ const checkEbayLink = async (sellerID) => {
     if(!ebayRefreshToken)
         return {success: false, message: "no valid ebay token linked to that seller"};
 
-    console.log(DateTime.now().toISO())
-    console.log(typeof(ebayRefreshToken.expiry_time))
-    console.log(DateTime.fromISO(ebayRefreshToken.expiry_time.toISOString()))
+    const tokenExpiry = DateTime.fromISO(ebayRefreshToken.expiry_time.toISOString());
         
-    if(DateTime.now().toISO() < ebayRefreshToken.expiry_time)
+    if(DateTime.now().toISO() < tokenExpiry)
         return {success: true, message: "there is a valid ebay token linked to that seller"};
     else
         return {success: false, message: "there was a valid ebay token linked to that seller, but it expired"};

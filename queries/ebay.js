@@ -91,7 +91,14 @@ const createEbayLink = async (sellerID, ebayOAuthCode) => {
     return result;
 }
 
+const createEbayProduct = async (sellerID, productReference) => {
+    const db = await _db;
+
+    return sellerID + " " + productReference;
+}
+
 module.exports = {
     checkEbayLink,
-    createEbayLink
+    createEbayLink,
+    createEbayProduct
 }

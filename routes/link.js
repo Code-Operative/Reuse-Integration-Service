@@ -5,11 +5,10 @@ const linkRoutes = [
         method: 'GET',
         path: '/link/ebay/{sellerID}',
         config: {
-            cors: true
-            /*{
+            cors: {
                 origin: ['*'],
                 additionalHeaders: ['cache-control', 'x-requested-with']
-            }*/
+            }
         },
         handler: async(request)=> {
             const {sellerID} = request.params;
@@ -30,9 +29,6 @@ const linkRoutes = [
         },
         handler: async(request)=> {
             const {sellerID, ebayOAuthCode} = request.payload;
-
-            console.log(sellerID)
-            console.log(ebayOAuthCode)
 
             const result = await createEbayLink(sellerID, ebayOAuthCode);
 

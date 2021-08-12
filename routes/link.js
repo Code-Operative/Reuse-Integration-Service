@@ -5,10 +5,11 @@ const linkRoutes = [
         method: 'GET',
         path: '/link/ebay/{sellerID}',
         config: {
-            cors: {
+            cors: true
+            /*{
                 origin: ['*'],
                 additionalHeaders: ['cache-control', 'x-requested-with']
-            }
+            }*/
         },
         handler: async(request)=> {
             const {sellerID} = request.params;

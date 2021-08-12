@@ -94,6 +94,9 @@ const createEbayLink = async (sellerID, ebayOAuthCode) => {
 const createEbayProduct = async (sellerID, productReference) => {
     const db = await _db;
 
+    console.log(sellerID)
+    console.log(productReference)
+
     return sellerID + " " + productReference;
 }
 

@@ -31,7 +31,12 @@ const linkRoutes = [
         handler: async(request)=> {
             const {sellerID, ebayOAuthCode} = request.payload;
 
+            console.log(sellerID)
+            console.log(ebayOAuthCode)
+
             const result = await createEbayLink(sellerID, ebayOAuthCode);
+
+            console.log(result)
 
             return result;
         }

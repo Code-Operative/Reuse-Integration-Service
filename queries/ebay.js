@@ -42,6 +42,8 @@ const createEbayLink = async (sellerID, ebayOAuthCode) => {
 
     let result = {};
 
+    console.log(tokens)
+
     const seller = await db.sellers.findOne({id: sellerID});
 
     if(!seller){

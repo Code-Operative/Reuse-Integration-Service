@@ -1,4 +1,5 @@
 const {_db} = require('./query');
+const {getAuthToken} = require('./tokens');
 
 const checkEbayLink = async (sellerID) => {
     const db = await _db;
@@ -93,11 +94,275 @@ const createEbayLink = async (sellerID, ebayOAuthCode) => {
 
 const createEbayProduct = async (sellerID, productReference) => {
     const db = await _db;
+    const fetch = require("node-fetch");
 
     console.log(sellerID)
     console.log(productReference)
 
-    return sellerID + " " + productReference;
+    //using the sellerID, make calls to the prestashop web service to get the product ID, 
+    //checking against the product reference
+
+    const sellerResponse = await fetch(`https://reusenetwork.code-operative.co.uk/api/kbsellers/${sellerID}?output_format=JSON`,{
+        headers: {
+          "Authorization": "Basic MlJSQ0wxOU44S1BYSFc3TTlWWUtNUTFHWElTVFRCSjc6",
+        }
+    });
+    
+    const sellerData = await sellerResponse.json();
+    const kbProducts = sellerData.seller.associations.kbsellerproducts;
+
+    let matchingProduct;
+
+    for(let i = 1;i <= kbProducts.length;i++){
+        const kbProduct = kbProducts[kbProducts.length - i]; //iterate from the end of the array, where the most recent products are
+
+        const kbProductResponse = await fetch(`https://reusenetwork.code-operative.co.uk/api/kbsellerproducts/${kbProduct.id}?output_format=JSON`,{
+            headers: {
+              "Authorization": "Basic MlJSQ0wxOU44S1BYSFc3TTlWWUtNUTFHWElTVFRCSjc6",
+            }
+        });
+        const kbProductData = await kbProductResponse.json();
+        const productID = kbProductData.kbsellerproduct.id_product;
+
+        console.log(kbProductData);
+
+        const productResponse = await fetch(`https://reusenetwork.code-operative.co.uk/api/products/${productID}?output_format=JSON`,{
+            headers: {
+              "Authorization": "Basic MlJSQ0wxOU44S1BYSFc3TTlWWUtNUTFHWElTVFRCSjc6",
+            }
+        });
+        const productData = await productResponse.json();
+
+        console.log(productData)
+
+        if(productData.product.reference == productReference){
+            matchingProduct = productData.product;
+            break;
+        }
+    }
+
+    if(!matchingProduct)
+        return {success: false, message: "no product that matches that reference"};
+
+    //check the items db, to see if we have it already
+    const item = await db.items.findOne({id: matchingProduct.id});
+    
+    //if we do, update the product
+    if(item){
+        await db.items.update({id: matchingProduct.id},{
+            reference: matchingProduct.reference,
+            seller_id: sellerID,
+            quantity: matchingProduct.available_for_order
+        })
+    } //if not, store it and get ready to post
+    else{
+        await db.items.insert({
+            id: matchingProduct.id,
+            reference: matchingProduct.reference,
+            seller_id: sellerID,
+            quantity: matchingProduct.available_for_order
+        })
+    }
+
+    const authToken = await getAuthToken(sellerID);
+      
+    let merchantLocationKey;
+    //get location, if none create one
+    const locationsResponse = await fetch(`https://api.ebay.com/sell/inventory/v1/location`,{
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + authToken
+        }
+    })
+    const locationsData = await locationsResponse.json();
+
+    const {locations} = locationsData;
+
+    if(locations.length > 0)
+        merchantLocationKey = locations[0].merchantLocationKey;
+    
+    console.log(merchantLocationKey)
+
+    
+    //get fulfillment policy, if none create one
+    let fulfillmentPolicyId;
+
+    const fulfillmentPoliciesResponse = await fetch(`https://api.ebay.com/sell/account/v1/fulfillment_policy?marketplace_id=EBAY_GB`,{
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + authToken
+        }
+    })
+    const fulfillmentPoliciesData = await fulfillmentPoliciesResponse.json();
+
+    const {fulfillmentPolicies} = fulfillmentPoliciesData;
+
+    if(fulfillmentPolicies.length > 0)
+        fulfillmentPolicyId = fulfillmentPolicies[0].fulfillmentPolicyId;
+
+    console.log(fulfillmentPolicyId)
+
+    //get payment policy, if none create one
+    let paymentPolicyId;
+    
+    const paymentPoliciesResponse = await fetch(`https://api.ebay.com/sell/account/v1/payment_policy?marketplace_id=EBAY_GB`,{
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + authToken
+        }
+    })
+    const paymentPoliciesData = await paymentPoliciesResponse.json();
+
+    const {paymentPolicies} = paymentPoliciesData;
+
+    if(paymentPolicies.length > 0)
+        paymentPolicyId = paymentPolicies[0].paymentPolicyId;
+
+    console.log(paymentPolicyId)
+
+    //get returns policy, if none create one
+    let returnPolicyId;
+    
+    const returnPoliciesResponse = await fetch(`https://api.ebay.com/sell/account/v1/return_policy?marketplace_id=EBAY_GB`,{
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + authToken
+        }
+    })
+    const returnPoliciesData = await returnPoliciesResponse.json();
+
+    const {returnPolicies} = returnPoliciesData;
+
+    if(returnPolicies.length > 0)
+        returnPolicyId = returnPolicies[0].returnPolicyId;
+
+    console.log(returnPolicyId)
+    
+    
+
+    //create inventory item
+
+    const inventoryResponse = await fetch(`https://api.ebay.com/sell/inventory/v1/inventory_item/${productReference}`,{
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+            "Content-Language": "en-GB",
+            "Authorization": "Bearer " + authToken
+        },
+        body: JSON.stringify({
+            availability: {
+                shipToLocationAvailability: {
+                    quantity: matchingProduct.available_for_order
+                }
+            },
+            condition: "NEW",
+            product: {
+                title: matchingProduct.name,
+                description: matchingProduct.description ? matchingProduct.description : "no description",
+                aspects: {
+                    Brand: [
+                        "No brand"
+                    ],
+                    Type: [
+                        "No type"
+                    ],
+                },
+                imageUrls: [
+                    "https://reusenetwork.code-operative.co.uk/img/p/6/6.jpg"
+                ]
+            }
+        })
+    })
+
+    let inventoryData;
+    if(inventoryResponse.status == 204)
+        inventoryData = "everything's fine";
+    else
+        inventoryData = await inventoryResponse.json();
+
+    console.log(inventoryData);
+    
+    //create offer or update offer actually, depending on if there is one for this item id
+
+    let offerURL = `https://api.ebay.com/sell/inventory/v1/offer/`;
+    let offerMethod = "POST";
+
+    const offer = await db.ebay_items.findOne({id: matchingProduct.id});
+
+    console.log(offer)
+
+    if(offer){
+        offerURL = `https://api.ebay.com/sell/inventory/v1/offer/${offer.offer_id}`;
+        offerMethod = "PUT";
+    }
+    
+    const offerResponse = await fetch(offerURL,{
+        method: offerMethod,
+        headers: {
+            "Content-Type": "application/json",
+            "Content-Language": "en-GB",
+            "Authorization": "Bearer " + authToken
+        },
+        body: JSON.stringify({
+            sku: productReference,
+            marketplaceId: "EBAY_GB",
+            format: "FIXED_PRICE",
+            availableQuantity: matchingProduct.available_for_order,
+            categoryId: "54235",
+            listingDescription: matchingProduct.description ? matchingProduct.description : "no description",
+            merchantLocationKey: merchantLocationKey,
+            pricingSummary: {
+                price: {
+                    currency: "GBP",
+                    value: matchingProduct.show_price
+                }
+            },
+            listingPolicies: {
+                fulfillmentPolicyId: fulfillmentPolicyId,
+                paymentPolicyId: paymentPolicyId,
+                returnPolicyId: returnPolicyId
+            },
+            includeCatalogProductDetails: true
+        })
+    });
+
+    let offerData = {};
+    if(offerResponse.status == 204){
+        offerData.offerId = offer.offer_id;
+        offerData.message = "offer everything's fine";
+    }
+    else
+        offerData = await offerResponse.json();
+
+    console.log(offerData)
+
+    //publish offer
+
+    const publishResponse = await fetch(`https://api.ebay.com/sell/inventory/v1/offer/${offerData.offerId}/publish/`,{
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Content-Language": "en-GB",
+            "Authorization": "Bearer " + authToken
+        }
+    });
+    const publishData = await publishResponse.json();
+
+    console.log(publishData);
+
+    //store ebay item in db
+    if(!offer){
+        await db.ebay_items.insert({
+            id: matchingProduct.id,
+            offer_id: offerData.offerId
+        })
+    }
+
+    return {success: true, message: "item listed on ebay"};
 }
 
 module.exports = {

@@ -1,9 +1,10 @@
 const {test} = require('../queries/test');
+const {getAuthToken} = require('../queries/tokens');
 
 const testRoutes = [
     {
         method: 'GET',
-        path: '/test',
+        path: '/test/{sellerID}',
         config: {
             cors: {
                 origin: ['*'],
@@ -11,7 +12,7 @@ const testRoutes = [
             }
         },
         handler: async(request)=> {
-            const result = await test();
+            const result = await getAuthToken(request.params.sellerID);
 
             return result;
         }

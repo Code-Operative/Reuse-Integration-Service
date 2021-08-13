@@ -220,6 +220,23 @@ const createEbayProduct = async (sellerID, productReference) => {
 
     if(paymentPolicies.length > 0)
         paymentPolicyId = paymentPolicies[0].paymentPolicyId;
+    else{
+        const newPaymentPolicyResponse = await fetch(`https://api.ebay.com/sell/account/v1/payment_policy`,{
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Content-Language": "en-GB",
+                "Authorization": "Bearer " + authToken
+            },
+            body: JSON.stringify({
+
+            })
+        });
+        const newPaymentPolicyData =  await newPaymentPolicyResponse.json();
+
+        paymentPolicyId = newPaymentPolicyData.paymentPolicyId;
+    }
+
 
     console.log(paymentPolicyId)
 

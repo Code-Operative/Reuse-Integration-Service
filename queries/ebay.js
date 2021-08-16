@@ -1,3 +1,4 @@
+const { createEbayPaymentPolicy } = require('./ebayPolicy');
 const {_db} = require('./query');
 const {getAuthToken} = require('./tokens');
 
@@ -104,7 +105,7 @@ const createEbayProduct = async (sellerID, productReference) => {
 
     const sellerResponse = await fetch(`https://reusenetwork.code-operative.co.uk/api/kbsellers/${sellerID}?output_format=JSON`,{
         headers: {
-          "Authorization": "Basic MlJSQ0wxOU44S1BYSFc3TTlWWUtNUTFHWElTVFRCSjc6",
+          "Authorization": "Basic " + process.env.REUSE_API_KEY,
         }
     });
     
@@ -118,7 +119,7 @@ const createEbayProduct = async (sellerID, productReference) => {
 
         const kbProductResponse = await fetch(`https://reusenetwork.code-operative.co.uk/api/kbsellerproducts/${kbProduct.id}?output_format=JSON`,{
             headers: {
-              "Authorization": "Basic MlJSQ0wxOU44S1BYSFc3TTlWWUtNUTFHWElTVFRCSjc6",
+              "Authorization": "Basic " + process.env.REUSE_API_KEY,
             }
         });
         const kbProductData = await kbProductResponse.json();
@@ -128,15 +129,28 @@ const createEbayProduct = async (sellerID, productReference) => {
 
         const productResponse = await fetch(`https://reusenetwork.code-operative.co.uk/api/products/${productID}?output_format=JSON`,{
             headers: {
-              "Authorization": "Basic MlJSQ0wxOU44S1BYSFc3TTlWWUtNUTFHWElTVFRCSjc6",
+              "Authorization": "Basic " + process.env.REUSE_API_KEY,
             }
         });
         const productData = await productResponse.json();
 
         console.log(productData)
 
+        //fetch the quantity available
+        const stockID = productData.product.associations.stock_availables[0].id;
+
+        const stockResponse = await fetch(`https://reusenetwork.code-operative.co.uk/api/stock_availables/${stockID}?output_format=JSON`,{
+            headers: {
+                "Authorization": "Basic " + process.env.REUSE_API_KEY,
+            }
+        });
+        const stockData = await stockResponse.json()
+
+        quantityOnReuse = stockData.stock_available.quantity;
+
         if(productData.product.reference == productReference){
             matchingProduct = productData.product;
+            matchingProduct.available_for_order = quantityOnReuse;
             break;
         }
     }
@@ -221,22 +235,8 @@ const createEbayProduct = async (sellerID, productReference) => {
     if(paymentPolicies.length > 0)
         paymentPolicyId = paymentPolicies[0].paymentPolicyId;
     else{
-        const newPaymentPolicyResponse = await fetch(`https://api.ebay.com/sell/account/v1/payment_policy`,{
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Content-Language": "en-GB",
-                "Authorization": "Bearer " + authToken
-            },
-            body: JSON.stringify({
-
-            })
-        });
-        const newPaymentPolicyData =  await newPaymentPolicyResponse.json();
-
-        paymentPolicyId = newPaymentPolicyData.paymentPolicyId;
+        paymentPolicyId = await createEbayPaymentPolicy(authToken);
     }
-
 
     console.log(paymentPolicyId)
 

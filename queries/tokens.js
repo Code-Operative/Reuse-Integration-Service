@@ -33,7 +33,7 @@ const getAuthToken = async (sellerID) => {
             {order: [{field: 'id', direction: 'desc'}]}
         );
 
-        const scopes = "https%3A%2F%2Fapi.ebay.com%2Foauth%2Fapi_scope%2Fsell.inventory%20https%3A%2F%2Fapi.ebay.com%2Foauth%2Fapi_scope%2Fsell.account";
+        const scopes = "https%3A%2F%2Fapi.ebay.com%2Foauth%2Fapi_scope%2Fsell.inventory%20https%3A%2F%2Fapi.ebay.com%2Foauth%2Fapi_scope%2Fsell.account%20https%3A%2F%2Fapi.ebay.com%2Foauth%2Fapi_scope%2Fcommerce.notification.subscription";
 
         let accessTokenResponse = await ebayAuthToken.getAccessToken('PRODUCTION', refreshToken.value, scopes);
         

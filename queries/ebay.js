@@ -1,6 +1,10 @@
-const { createEbayPaymentPolicy } = require('./ebayPolicy');
 const {_db} = require('./query');
 const {getAuthToken} = require('./tokens');
+const { 
+    createEbayPaymentPolicy, 
+    createEbayFulfillmentPolicy, 
+    createEbayReturnPolicy 
+} = require('./ebayPolicy');
 
 const checkEbayLink = async (sellerID) => {
     const db = await _db;
@@ -103,7 +107,7 @@ const createEbayProduct = async (sellerID, productReference) => {
     //using the sellerID, make calls to the prestashop web service to get the product ID, 
     //checking against the product reference
 
-    const sellerResponse = await fetch(`https://reusenetwork.code-operative.co.uk/api/kbsellers/${sellerID}?output_format=JSON`,{
+    const sellerResponse = await fetch(`${process.env.REUSE_URL}/api/kbsellers/${sellerID}?output_format=JSON`,{
         headers: {
           "Authorization": "Basic " + process.env.REUSE_API_KEY,
         }
@@ -117,7 +121,7 @@ const createEbayProduct = async (sellerID, productReference) => {
     for(let i = 1;i <= kbProducts.length;i++){
         const kbProduct = kbProducts[kbProducts.length - i]; //iterate from the end of the array, where the most recent products are
 
-        const kbProductResponse = await fetch(`https://reusenetwork.code-operative.co.uk/api/kbsellerproducts/${kbProduct.id}?output_format=JSON`,{
+        const kbProductResponse = await fetch(`${process.env.REUSE_URL}/api/kbsellerproducts/${kbProduct.id}?output_format=JSON`,{
             headers: {
               "Authorization": "Basic " + process.env.REUSE_API_KEY,
             }
@@ -127,7 +131,7 @@ const createEbayProduct = async (sellerID, productReference) => {
 
         console.log(kbProductData);
 
-        const productResponse = await fetch(`https://reusenetwork.code-operative.co.uk/api/products/${productID}?output_format=JSON`,{
+        const productResponse = await fetch(`${process.env.REUSE_URL}/api/products/${productID}?output_format=JSON`,{
             headers: {
               "Authorization": "Basic " + process.env.REUSE_API_KEY,
             }
@@ -139,7 +143,7 @@ const createEbayProduct = async (sellerID, productReference) => {
         //fetch the quantity available
         const stockID = productData.product.associations.stock_availables[0].id;
 
-        const stockResponse = await fetch(`https://reusenetwork.code-operative.co.uk/api/stock_availables/${stockID}?output_format=JSON`,{
+        const stockResponse = await fetch(`${process.env.REUSE_URL}/api/stock_availables/${stockID}?output_format=JSON`,{
             headers: {
                 "Authorization": "Basic " + process.env.REUSE_API_KEY,
             }
@@ -157,6 +161,12 @@ const createEbayProduct = async (sellerID, productReference) => {
 
     if(!matchingProduct)
         return {success: false, message: "no product that matches that reference"};
+
+    let imageUrl;
+    if(matchingProduct.id_default_image){
+        let imageID = matchingProduct.id_default_image;
+        imageUrl = `${process.env.REUSE_URL}/img/p/${imageID}/${imageID}.jpg`
+    }
 
     //check the items db, to see if we have it already
     const item = await db.items.findOne({id: matchingProduct.id});
@@ -195,9 +205,8 @@ const createEbayProduct = async (sellerID, productReference) => {
 
     if(locations.length > 0)
         merchantLocationKey = locations[0].merchantLocationKey;
-    
-    console.log(merchantLocationKey)
-
+    else
+        merchantLocationKey = await createLocation(authToken,sellerData.seller);
     
     //get fulfillment policy, if none create one
     let fulfillmentPolicyId;
@@ -215,8 +224,8 @@ const createEbayProduct = async (sellerID, productReference) => {
 
     if(fulfillmentPolicies.length > 0)
         fulfillmentPolicyId = fulfillmentPolicies[0].fulfillmentPolicyId;
-
-    console.log(fulfillmentPolicyId)
+    else
+        fulfillmentPolicyId = await createEbayFulfillmentPolicy(authToken);
 
     //get payment policy, if none create one
     let paymentPolicyId;
@@ -234,11 +243,8 @@ const createEbayProduct = async (sellerID, productReference) => {
 
     if(paymentPolicies.length > 0)
         paymentPolicyId = paymentPolicies[0].paymentPolicyId;
-    else{
+    else
         paymentPolicyId = await createEbayPaymentPolicy(authToken);
-    }
-
-    console.log(paymentPolicyId)
 
     //get returns policy, if none create one
     let returnPolicyId;
@@ -256,10 +262,8 @@ const createEbayProduct = async (sellerID, productReference) => {
 
     if(returnPolicies.length > 0)
         returnPolicyId = returnPolicies[0].returnPolicyId;
-
-    console.log(returnPolicyId)
-    
-    
+    else
+        returnPolicyId = await createEbayReturnPolicy(authToken);
 
     //create inventory item
 
@@ -289,7 +293,7 @@ const createEbayProduct = async (sellerID, productReference) => {
                     ],
                 },
                 imageUrls: [
-                    "https://reusenetwork.code-operative.co.uk/img/p/6/6.jpg"
+                    imageUrl? imageUrl :`${process.env.REUSE_URL}/img/p/gb-default-large_default.jpg`
                 ]
             }
         })

@@ -165,8 +165,9 @@ const createEbayProduct = async (sellerID, productReference) => {
     let imageUrl;
     if(matchingProduct.id_default_image){
         let imageID = matchingProduct.id_default_image;
-        imageUrl = `${process.env.REUSE_URL}/img/p/${imageID}/${imageID}.jpg`
+        imageUrl = `https://reuse-home-integration-service.herokuapp.com/image/${matchingProduct.id}/${imageID}`
     }
+
 
     //check the items db, to see if we have it already
     const item = await db.items.findOne({id: matchingProduct.id});

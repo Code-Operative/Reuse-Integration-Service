@@ -13,12 +13,14 @@ const init = async () => {
     const {testRoutes} = require('./routes/test');
     const {productRoutes} = require('./routes/product');
     const {routineRoutes} = require('./routes/routine');
+    const {imageRoutes} = require('./routes/image');
 
     const routes = [
         ...linkRoutes,
         ...testRoutes,
         ...productRoutes,
-        ...routineRoutes
+        ...routineRoutes,
+        ...imageRoutes
     ];
 
     server.route(routes);

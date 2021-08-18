@@ -1,5 +1,4 @@
 const fetch = require("node-fetch");
-const File = require("file-class");
 
 const imageRoutes = [
     {

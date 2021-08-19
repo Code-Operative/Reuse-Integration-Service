@@ -340,7 +340,7 @@ const createEbayProduct = async (sellerID, productReference) => {
             pricingSummary: {
                 price: {
                     currency: "GBP",
-                    value: matchingProduct.show_price
+                    value: matchingProduct.price
                 }
             },
             listingPolicies: {

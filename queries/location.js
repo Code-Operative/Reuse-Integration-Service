@@ -24,6 +24,8 @@ const createLocation = async (authToken, seller) => {
         }
     }
 
+
+
     //call the ebay location api with the address
 
     const merchantLocationKey = "reuse-location"
@@ -38,9 +40,9 @@ const createLocation = async (authToken, seller) => {
         body: JSON.stringify({
             location: {
                 address: {
-                    addressLine1: matchingAddress.address1,
-                    city: matchingAddress.city,
-                    postalCode: matchingAddress.postcode,
+                    addressLine1: seller.address.split(",")[0],
+                    city: seller.state,
+                    postalCode: seller.address.split(",")[1],
                     country: "GB"
                 }
             },

@@ -1,31 +1,6 @@
 const fetch = require("node-fetch");
 
 const createLocation = async (authToken, seller) => {
-    const addressesResponse = await fetch(`${process.env.REUSE_URL}/api/addresses?output_format=JSON`,{
-        headers: {
-            "Authorization": "Basic " + process.env.REUSE_API_KEY,
-        }
-    });
-    const addressesData = await addressesResponse.json();
-
-    //loop through addresses, find the address with the matching customer id
-    let matchingAddress;
-    for(const address of addressesData.addresses){
-        const addressResponse = await fetch(`${process.env.REUSE_URL}/api/addresses/${address.id}?output_format=JSON`,{
-            headers: {
-                "Authorization": "Basic " + process.env.REUSE_API_KEY,
-            }
-        });
-        const addressData = await addressResponse.json();
-
-        if(addressData.address.id_customer == seller.id_customer){
-            matchingAddress = addressData.address;
-            break;
-        }
-    }
-
-
-
     //call the ebay location api with the address
 
     const merchantLocationKey = "reuse-location"
@@ -58,6 +33,21 @@ const createLocation = async (authToken, seller) => {
     return merchantLocationKey;
 }
 
+const getLocations = async (authToken) => {
+    const locationsResponse = await fetch(`https://api.ebay.com/sell/inventory/v1/location`,{
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + authToken
+        }
+    })
+
+    const result = await locationsResponse.json();
+    
+    return result;
+}
+
 module.exports = {
-    createLocation
+    createLocation,
+    getLocations
 }

@@ -4,8 +4,11 @@ const {
     createEbayPaymentPolicy, 
     createEbayFulfillmentPolicy, 
     createEbayReturnPolicy,
+    getPaymentPolicies,
+    getFulfillmentPolicies,
+    getReturnPolicies
 } = require('./ebayPolicy');
-const { createLocation } = require('./location');
+const { createLocation, getLocations } = require('./location');
 
 const checkEbayLink = async (sellerID) => {
     const db = await _db;
@@ -94,6 +97,33 @@ const createEbayLink = async (sellerID, ebayOAuthCode) => {
         result.message = "seller and ebay tokens created";
     else
         result.message = "ebay tokens updated for seller";
+
+    const sellerResponse = await fetch(`${process.env.REUSE_URL}/api/kbsellers/${sellerID}?output_format=JSON`,{
+        headers: {
+            "Authorization": "Basic " + process.env.REUSE_API_KEY,
+        }
+    });
+    const sellerData = await sellerResponse.json();
+
+    //if there's no merchant location, create one
+    const {locations} = await getLocations(tokens.access_token);
+    if(!locations.length > 0)
+        await createLocation(tokens.access_token,sellerData.seller); 
+    
+    //if there's no fulfillment policy, create one
+    const {fulfillmentPolicies} = await getFulfillmentPolicies(tokens.access_token) ;
+    if(!fulfillmentPolicies.length > 0)
+        await createEbayFulfillmentPolicy(tokens.access_token);
+
+    //if there's no payment policy, create one
+    const {paymentPolicies} = await getPaymentPolicies(tokens.access_token);
+    if(!paymentPolicies.length > 0)
+        await createEbayPaymentPolicy(tokens.access_token);
+
+    //if there's no return policy, create one
+    const {returnPolicies} = await getReturnPolicies(tokens.access_token);
+    if(!returnPolicies.length > 0)
+        await createEbayReturnPolicy(tokens.access_token);
     
     return result;
 }
@@ -169,7 +199,6 @@ const createEbayProduct = async (sellerID, productReference) => {
         imageUrl = `https://reuse-home-integration-service.herokuapp.com/image/${matchingProduct.id}/${imageID}`
     }
 
-
     //check the items db, to see if we have it already
     const item = await db.items.findOne({id: matchingProduct.id});
     
@@ -193,17 +222,10 @@ const createEbayProduct = async (sellerID, productReference) => {
     const authToken = await getAuthToken(sellerID);
       
     let merchantLocationKey;
-    //get location, if none create one
-    const locationsResponse = await fetch(`https://api.ebay.com/sell/inventory/v1/location`,{
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": "Bearer " + authToken
-        }
-    })
-    const locationsData = await locationsResponse.json();
 
-    const {locations} = locationsData;
+    //get location, if none create one   
+
+    const {locations} = await getLocations(authToken);
 
     if(locations.length > 0)
         merchantLocationKey = locations[0].merchantLocationKey;
@@ -213,16 +235,7 @@ const createEbayProduct = async (sellerID, productReference) => {
     //get fulfillment policy, if none create one
     let fulfillmentPolicyId;
 
-    const fulfillmentPoliciesResponse = await fetch(`https://api.ebay.com/sell/account/v1/fulfillment_policy?marketplace_id=EBAY_GB`,{
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": "Bearer " + authToken
-        }
-    })
-    const fulfillmentPoliciesData = await fulfillmentPoliciesResponse.json();
-
-    const {fulfillmentPolicies} = fulfillmentPoliciesData;
+    const {fulfillmentPolicies} = await getFulfillmentPolicies(authToken) ;
 
     if(fulfillmentPolicies.length > 0)
         fulfillmentPolicyId = fulfillmentPolicies[0].fulfillmentPolicyId;
@@ -231,17 +244,8 @@ const createEbayProduct = async (sellerID, productReference) => {
 
     //get payment policy, if none create one
     let paymentPolicyId;
-    
-    const paymentPoliciesResponse = await fetch(`https://api.ebay.com/sell/account/v1/payment_policy?marketplace_id=EBAY_GB`,{
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": "Bearer " + authToken
-        }
-    })
-    const paymentPoliciesData = await paymentPoliciesResponse.json();
 
-    const {paymentPolicies} = paymentPoliciesData;
+    const {paymentPolicies} = await getPaymentPolicies(authToken);
 
     if(paymentPolicies.length > 0)
         paymentPolicyId = paymentPolicies[0].paymentPolicyId;
@@ -250,17 +254,8 @@ const createEbayProduct = async (sellerID, productReference) => {
 
     //get returns policy, if none create one
     let returnPolicyId;
-    
-    const returnPoliciesResponse = await fetch(`https://api.ebay.com/sell/account/v1/return_policy?marketplace_id=EBAY_GB`,{
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": "Bearer " + authToken
-        }
-    })
-    const returnPoliciesData = await returnPoliciesResponse.json();
 
-    const {returnPolicies} = returnPoliciesData;
+    const {returnPolicies} = await getReturnPolicies(authToken);
 
     if(returnPolicies.length > 0)
         returnPolicyId = returnPolicies[0].returnPolicyId;

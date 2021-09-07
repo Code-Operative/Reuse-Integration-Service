@@ -1,5 +1,18 @@
 const fetch = require("node-fetch");
 
+const getPaymentPolicies = async (authToken) => {
+    const paymentPoliciesResponse = await fetch(`https://api.ebay.com/sell/account/v1/payment_policy?marketplace_id=EBAY_GB`,{
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + authToken
+        }
+    })
+    const result = await paymentPoliciesResponse.json();
+
+    return result;
+}
+
 const createEbayPaymentPolicy = async (authToken) => {
     const newPaymentPolicyResponse = await fetch(`https://api.ebay.com/sell/account/v1/payment_policy`,{
         method: "POST",
@@ -38,6 +51,19 @@ const createEbayPaymentPolicy = async (authToken) => {
     return newPaymentPolicyData.paymentPolicyId;
 }
 
+const getReturnPolicies = async (authToken) => {
+    const returnPoliciesResponse = await fetch(`https://api.ebay.com/sell/account/v1/return_policy?marketplace_id=EBAY_GB`,{
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + authToken
+        }
+    })
+    const result = await returnPoliciesResponse.json();
+
+    return result;
+}
+
 const createEbayReturnPolicy = async (authToken) => {
     const newReturnPolicyResponse = await fetch(`https://api.ebay.com/sell/account/v1/return_policy`,{
         method: "POST",
@@ -70,6 +96,19 @@ const createEbayReturnPolicy = async (authToken) => {
     console.log(newReturnPolicyData);
 
     return newReturnPolicyData.returnPolicyId;
+}
+
+const getFulfillmentPolicies = async (authToken) => {
+    const fulfillmentPoliciesResponse = await fetch(`https://api.ebay.com/sell/account/v1/fulfillment_policy?marketplace_id=EBAY_GB`,{
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + authToken
+        }
+    })
+    const result = await fulfillmentPoliciesResponse.json();
+
+    return result;
 }
 
 const createEbayFulfillmentPolicy = async (authToken) => {
@@ -138,5 +177,8 @@ const createEbayFulfillmentPolicy = async (authToken) => {
 module.exports = {
     createEbayPaymentPolicy,
     createEbayReturnPolicy,
-    createEbayFulfillmentPolicy
+    createEbayFulfillmentPolicy,
+    getPaymentPolicies,
+    getReturnPolicies,
+    getFulfillmentPolicies
 }

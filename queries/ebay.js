@@ -376,6 +376,7 @@ const createEbayProduct = async (sellerID, productReference) => {
     const publishData = await publishResponse.json();
 
     console.log(publishData);
+    console.log(errors[0].parameters)
 
     //store ebay item in db
     if(!offer){

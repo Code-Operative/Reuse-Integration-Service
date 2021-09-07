@@ -41,8 +41,8 @@ const checkEbayLink = async (sellerID) => {
 const createEbayLink = async (sellerID, ebayOAuthCode) => {
     const db = await _db;
     const { DateTime } = require("luxon");
-
     const EbayAuthToken = require('ebay-oauth-nodejs-client');
+    const fetch = require("node-fetch");
 
     const ebayAuthToken = new EbayAuthToken({
         clientId: process.env.CLIENT_ID,

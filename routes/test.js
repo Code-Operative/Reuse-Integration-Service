@@ -38,7 +38,7 @@ const testRoutes = [
 
             let result = {};
 
-            result.data = [];
+            result.data = {};
 
             for(const category of categories){
 
@@ -49,10 +49,12 @@ const testRoutes = [
                 });
                 const categoryData = await categoryResponse.json(); 
 
-                result.data.push({
-                    id: categoryData.category.id,
+                result.data[categoryData.category.id] = {
                     name: categoryData.category.name,
-                });
+                    parentCategoryID: categoryData.category.id_parent,
+                    parentCategoryName: result.data[categoryData.category.id_parent]? result.data[categoryData.category.id_parent].name : "none",
+                    matchingEbayID: 0,
+                };
             }
 
             result.success = true;

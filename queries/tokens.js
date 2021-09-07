@@ -21,8 +21,6 @@ const getAuthToken = async (sellerID) => {
 
     const tokenExpiry = DateTime.fromISO(possibleAccessToken.expiry_time.toISOString());
 
-    console.log(DateTime.now() > tokenExpiry)
-
     let accessToken;
 
     if(DateTime.now() > tokenExpiry){ //if token has expired
@@ -37,7 +35,6 @@ const getAuthToken = async (sellerID) => {
 
         let accessTokenResponse = await ebayAuthToken.getAccessToken('PRODUCTION', refreshToken.value, scopes);
         
-        console.log(accessTokenResponse)
         const tokens = await JSON.parse(accessTokenResponse);
 
         const lastToken = await db.tokens.findOne({}, {

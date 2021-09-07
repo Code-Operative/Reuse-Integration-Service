@@ -3,8 +3,9 @@ const {getAuthToken} = require('./tokens');
 const { 
     createEbayPaymentPolicy, 
     createEbayFulfillmentPolicy, 
-    createEbayReturnPolicy 
+    createEbayReturnPolicy,
 } = require('./ebayPolicy');
+const { createLocation } = require('./location');
 
 const checkEbayLink = async (sellerID) => {
     const db = await _db;

@@ -263,7 +263,7 @@ const createEbayProduct = async (sellerID, productReference) => {
     
     const {returnPolicies} = result;
     
-    if(returnPolicies.length > 0)
+    if(sellerID != 40 && returnPolicies.length > 0)
         returnPolicyId = returnPolicies[0].returnPolicyId;
     else
         returnPolicyId = await createEbayReturnPolicy(authToken);

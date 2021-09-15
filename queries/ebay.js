@@ -255,7 +255,7 @@ const createEbayProduct = async (sellerID, productReference) => {
     //get returns policy, if none create one
     let returnPolicyId;
 
-    /const {returnPolicies} = await getReturnPolicies(authToken);
+    //const {returnPolicies} = await getReturnPolicies(authToken);
 
     const result = await getReturnPolicies(authToken);
     

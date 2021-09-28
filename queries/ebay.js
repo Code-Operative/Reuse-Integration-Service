@@ -200,6 +200,8 @@ const createEbayProduct = async (sellerID, productReference) => {
         ebayCategoryId = ""+categories[categoryId].matchingEbayID;
     }
 
+    console.log(ebayCategoryId)
+
     if(ebayCategoryId == "0"){
         return {success: false, message: "couldn't match the product with an ebay category"}
     }

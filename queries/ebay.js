@@ -9,6 +9,7 @@ const {
     getReturnPolicies
 } = require('./ebayPolicy');
 const { createLocation, getLocations } = require('./location');
+const {categories} = require('../data/categories');
 
 const checkEbayLink = async (sellerID) => {
     const db = await _db;
@@ -132,8 +133,7 @@ const createEbayProduct = async (sellerID, productReference) => {
     const db = await _db;
     const fetch = require("node-fetch");
 
-    console.log(sellerID)
-    console.log(productReference)
+    console.log(sellerID + " is creating ebay upload of product ID: " + productReference);
 
     //using the sellerID, make calls to the prestashop web service to get the product ID, 
     //checking against the product reference
@@ -193,9 +193,20 @@ const createEbayProduct = async (sellerID, productReference) => {
     if(!matchingProduct)
         return {success: false, message: "no product that matches that reference"};
 
+    let ebayCategoryId;
+
+    if(matchingProduct.associations.categories.length > 0){
+        const categoryId = matchingProduct.associations.categories[0].id;
+        ebayCategoryId = categories[categoryId].matchingEbayID;
+    }
+
+    if(ebayCategoryId == 0){
+        return {success: false, message: "couldn't match the product with an ebay category"}
+    }
+
     let imageUrl;
     if(matchingProduct.id_default_image){
-        let imageID = matchingProduct.id_default_image;
+        const imageID = matchingProduct.id_default_image;
         imageUrl = `https://reuse-home-integration-service.herokuapp.com/image/${matchingProduct.id}/${imageID}`
     }
 
@@ -330,7 +341,7 @@ const createEbayProduct = async (sellerID, productReference) => {
             marketplaceId: "EBAY_GB",
             format: "FIXED_PRICE",
             availableQuantity: matchingProduct.available_for_order,
-            categoryId: "54235",
+            categoryId: ebayCategoryId,
             listingDescription: matchingProduct.description ? matchingProduct.description : "no description",
             merchantLocationKey: merchantLocationKey,
             pricingSummary: {

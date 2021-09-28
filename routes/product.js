@@ -1,4 +1,5 @@
 const {createEbayProduct} = require('../queries/ebay');
+const {checkCategoryIsValid} = require('../queries/check');
 
 const productRoutes = [
     {
@@ -20,6 +21,27 @@ const productRoutes = [
             setTimeout(async ()=>{
                 result = await createEbayProduct(sellerID,productReference);
             },5000);
+
+            console.log(result)
+
+            return result;
+        }
+    },
+    {
+        method: 'GET',
+        path: '/product/ebay/category/{categoryId}',
+        config: {
+            cors: {
+                origin: ['*'],
+                additionalHeaders: ['cache-control', 'x-requested-with']
+            }
+        },
+        handler: async(request)=> {
+            const {categoryId} = request.params;
+
+            let result;
+
+            result = await checkCategoryIsValid(categoryId);
 
             console.log(result)
 

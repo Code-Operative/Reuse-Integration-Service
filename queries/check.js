@@ -1,6 +1,8 @@
 const {_db} = require('./query');
 const {getAuthToken} = require('./tokens');
 
+const {categories} = require('../data/categories');
+
 const checkForOrders = async () => {
     const db = await _db;
     const fetch = require("node-fetch");
@@ -110,6 +112,21 @@ const checkForOrders = async () => {
     return result;
 }
 
+const checkCategoryIsValid = (potentialCategoryId) => {
+    let ebayCategoryId;
+
+    if(categories[potentialCategoryId])
+        ebayCategoryId = categories[potentialCategoryId].matchingEbayId;
+    else
+        return {success: false, message: "no entry in the list of reuse categories for this category"};
+
+    if(!ebayCategoryId || ebayCategoryId == 0)
+        return {success: false, message: "no matching category"};
+    else
+        return {success: true, message: "category is valid", ebayCategoryId}
+}
+
 module.exports = {
-    checkForOrders
+    checkForOrders,
+    checkCategoryIsValid
 }

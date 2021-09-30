@@ -126,11 +126,11 @@ const checkCategoryIsValid = (potentialCategoryId) => {
             \nEbay requires that categorise be as specific as possible, so you need to choose a default category at the bottom of the file system.
             \nIn addition, the following categories aren't available for use with ebay at this time:
             \nSmall Electricals >> Kitchen
-            \nSmall Electricals >> Cleaning
-            \nHome & Garden >> Garden Tools & Accessories
-            \nHome & Garden >> Kitchen Accessories
-            \nHome & Garden >> Bric a Brac
-            \nHome & Garden >> Home Decor
+            Small Electricals >> Cleaning
+            Home & Garden >> Garden Tools & Accessories
+            Home & Garden >> Kitchen Accessories
+            Home & Garden >> Bric a Brac
+            Home & Garden >> Home Decor
             \nIf you'd like to use them, please email info@reuse-home.org.uk with your request.
             `
         };

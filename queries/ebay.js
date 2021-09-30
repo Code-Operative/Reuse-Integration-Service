@@ -200,7 +200,6 @@ const createEbayProduct = async (sellerID, productReference) => {
         ebayCategoryId = "" + categories[categoryId].matchingEbayId;
 
         console.log(ebayCategoryId)
-    console.log(categories)
     console.log(categories[categoryId])
     console.log(categories[categoryId].matchingEbayId)
     }

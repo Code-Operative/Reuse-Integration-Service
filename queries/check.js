@@ -125,7 +125,7 @@ const checkCategoryIsValid = (potentialCategoryId) => {
             `Ebay Integration: The default category chosen for this product isn't valid for ebay.
             \nEbay requires that categorise be as specific as possible, so you need to choose a default category at the bottom of the file system.
             \nIn addition, the following categories aren't available for use with ebay at this time:
-            \nSmall Electricals >> Kitchen
+            Small Electricals >> Kitchen
             Small Electricals >> Cleaning
             Home & Garden >> Garden Tools & Accessories
             Home & Garden >> Kitchen Accessories

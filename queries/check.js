@@ -118,10 +118,26 @@ const checkCategoryIsValid = (potentialCategoryId) => {
     if(categories[potentialCategoryId])
         ebayCategoryId = categories[potentialCategoryId].matchingEbayId;
     else
-        return {success: false, message: "no entry in the list of reuse categories for this category"};
+        return {success: false, message: "There is no entry in the list of reuse categories for this category."};
 
     if(!ebayCategoryId || ebayCategoryId == 0)
-        return {success: false, message: "no matching category"};
+        return {success: false, message: 
+            `Ebay Integration: The default category chosen for this product isn't valid for ebay.
+            \n
+            \nEbay requires that categorise be as specific as possible, so you need to choose a default category at the bottom of the file system.
+            \n
+            \nIn addition, the following categories aren't available for use with ebay at this time:
+            \n
+            \nSmall Electricals >> Kitchen
+            \nSmall Electricals >> Cleaning
+            \nHome & Garden >> Garden Tools & Accessories
+            \nHome & Garden >> Kitchen Accessories
+            \nHome & Garden >> Bric a Brac
+            \nHome & Garden >> Home Decor
+            \n
+            \nIf you'd like to use them, please email info@reuse-home.org.uk with your request.
+            `
+        };
     else
         return {success: true, message: "category is valid", ebayCategoryId}
 }
@@ -130,3 +146,4 @@ module.exports = {
     checkForOrders,
     checkCategoryIsValid
 }
+

@@ -283,6 +283,24 @@ const createEbayProduct = async (sellerID, productReference) => {
     const inventoryAspects = getAspects(ebayCategoryId);
 
     console.log(inventoryAspects)
+    const inventoryBody = JSON.stringify({
+        availability: {
+            shipToLocationAvailability: {
+                quantity: matchingProduct.available_for_order
+            }
+        },
+        condition: "NEW",
+        product: {
+            title: matchingProduct.name,
+            description: matchingProduct.description ? matchingProduct.description : "no description",
+            aspects: inventoryAspects,
+            imageUrls: [
+                imageUrl? imageUrl :`${process.env.REUSE_URL}/img/p/gb-default-large_default.jpg`
+            ]
+        }
+    })
+
+    console.log(inventoryBody)
 
     const inventoryResponse = await fetch(`https://api.ebay.com/sell/inventory/v1/inventory_item/${productReference}`,{
         method: "PUT",
@@ -291,22 +309,7 @@ const createEbayProduct = async (sellerID, productReference) => {
             "Content-Language": "en-GB",
             "Authorization": "Bearer " + authToken
         },
-        body: JSON.stringify({
-            availability: {
-                shipToLocationAvailability: {
-                    quantity: matchingProduct.available_for_order
-                }
-            },
-            condition: "NEW",
-            product: {
-                title: matchingProduct.name,
-                description: matchingProduct.description ? matchingProduct.description : "no description",
-                aspects: inventoryAspects,
-                imageUrls: [
-                    imageUrl? imageUrl :`${process.env.REUSE_URL}/img/p/gb-default-large_default.jpg`
-                ]
-            }
-        })
+        body: inventoryBody
     })
 
     let inventoryData;

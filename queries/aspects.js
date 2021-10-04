@@ -27,7 +27,7 @@ const getAspects = (ebayCategoryId) => {
         }
     })
 
-    return JSON.stringify(itemAspects);
+    return itemAspects;
 }
 
 module.exports = {

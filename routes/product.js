@@ -14,11 +14,11 @@ const productRoutes = [
         handler: async(request)=> {
             const {sellerID, productReference} = request.payload;
 
-            const wait = require('util').promisify(setTimeout)
+            const delay = require('util').promisify(setTimeout)
 
             let result;
 
-            wait(5000);
+            await delay(()=>{console.log("delaying")},5000);
 
             //introduce a delay to let prestashop set up the actual product
 
@@ -28,8 +28,6 @@ const productRoutes = [
             catch(error){
                 result = error;
             }*/
-
-            await result;
 
             console.log(result)
 

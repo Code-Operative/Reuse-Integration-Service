@@ -14,11 +14,11 @@ const productRoutes = [
         handler: async(request)=> {
             const {sellerID, productReference} = request.payload;
 
-            const delay = require('util').promisify(setTimeout)
+            const delay = require('util').promisify(setTimeout);
 
             let result;
 
-            await delay(()=>{console.log("delaying")},5000);
+            await delay(5000);
 
             //introduce a delay to let prestashop set up the actual product
 

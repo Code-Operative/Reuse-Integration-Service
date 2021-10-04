@@ -14,20 +14,17 @@ const productRoutes = [
         handler: async(request)=> {
             const {sellerID, productReference} = request.payload;
 
+            //introduce a delay to let prestashop set up the actual product
             const delay = require('util').promisify(setTimeout);
-
-            let result;
-
             await delay(5000);
 
-            //introduce a delay to let prestashop set up the actual product
-
-            //try{
+            let result;
+            try{
                 result = await createEbayProduct(sellerID,productReference);
-           /* }
+            }
             catch(error){
                 result = error;
-            }*/
+            }
 
             console.log(result)
 

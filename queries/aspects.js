@@ -9,7 +9,7 @@ const getAspects = (ebayCategoryId) => {
 
     aspectList.forEach(aspect => {
         if(aspect.mode == "FREE_TEXT")
-            itemAspects[aspect.name] = "none";
+            itemAspects[aspect.name] = ["none"];
         if(aspect.mode == "SELECTION_ONLY"){
             const parentCategoryName = categories[aspectRequirements.reuseCategoryId].parentCategoryName;
             let selectedValue;

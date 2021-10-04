@@ -321,7 +321,7 @@ const createEbayProduct = async (sellerID, productReference) => {
         inventoryData.errors.forEach(error => {
             console.log(error);
             if(error.parameters)
-                parameters.forEach(parameter => {
+                error.parameters.forEach(parameter => {
                     console.log(parameter)
                 })
         })

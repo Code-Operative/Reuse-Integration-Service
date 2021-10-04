@@ -20,9 +20,9 @@ const getAspects = (ebayCategoryId) => {
             })
 
             if(selectedValue)
-                itemAspects[aspect.name] = selectedValue;
+                itemAspects[aspect.name] = [selectedValue];
             else
-                itemAspects[aspect.name] = aspect.options[0];
+                itemAspects[aspect.name] = [aspect.options[0]];
             
         }
     })

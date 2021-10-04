@@ -4,10 +4,10 @@ const {categories} = require('../data/categories');
 const getAspects = (ebayCategoryId) => {
     const itemAspects = {};
 
-    const {aspects} = aspects[ebayCategoryId];
     const aspectRequirements = aspects[ebayCategoryId];
+    const aspectList = aspectRequirements.aspects;
 
-    aspects.forEach(aspect => {
+    aspectList.forEach(aspect => {
         if(aspect.mode == "FREE_TEXT")
             itemAspects[aspect.name] = "none";
         if(aspect.mode == "SELECTION_ONLY"){

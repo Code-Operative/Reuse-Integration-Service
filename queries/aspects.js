@@ -4,13 +4,14 @@ const {categories} = require('../data/categories');
 const getAspects = (ebayCategoryId) => {
     const itemAspects = {};
 
-    const aspectRequirements = aspects[ebayCategoryId].aspects;
+    const {aspects} = aspects[ebayCategoryId];
+    const aspectRequirements = aspects[ebayCategoryId];
 
-    aspectRequirements.forEach(aspect => {
+    aspects.forEach(aspect => {
         if(aspect.mode == "FREE_TEXT")
             itemAspects[aspect.name] = "none";
         if(aspect.mode == "SELECTION_ONLY"){
-            const parentCategoryName = categories[aspect.reuseCategoryId].parentCategoryName;
+            const parentCategoryName = categories[aspectRequirements.reuseCategoryId].parentCategoryName;
             let selectedValue;
 
             aspect.options.forEach(option => {

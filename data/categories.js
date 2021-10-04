@@ -1,3 +1,18 @@
+const testCategories = {
+    "64": {
+        "name": "Mattress",
+        "parentCategoryID": "11",
+        "parentCategoryName": "Bedroom",
+        "matchingEbayId": 131588
+    },
+    "105": {
+        "name": "Tops",
+        "parentCategoryID": "27",
+        "parentCategoryName": "Women's Clothing",
+        "matchingEbayId": 53159
+    },
+}
+
 const categories = {
     "1": {
                 "name": "Root",
@@ -956,5 +971,6 @@ const categories = {
     };
 
 module.exports = {
-    categories
+    categories,
+    testCategories
 }

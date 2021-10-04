@@ -10,6 +10,7 @@ const {
 } = require('./ebayPolicy');
 const { createLocation, getLocations } = require('./location');
 const {categories} = require('../data/categories');
+const {getAspects} = require('./aspects');
 
 const checkEbayLink = async (sellerID) => {
     const db = await _db;
@@ -198,13 +199,7 @@ const createEbayProduct = async (sellerID, productReference) => {
     if(matchingProduct.associations.categories.length > 0){
         const categoryId = matchingProduct.associations.categories[0].id;
         ebayCategoryId = "" + categories[categoryId].matchingEbayId;
-
-        console.log(ebayCategoryId)
-    console.log(categories[categoryId])
-    console.log(categories[categoryId].matchingEbayId)
-    }
-
-    
+    }    
 
     if(ebayCategoryId == "0"){
         return {success: false, message: "couldn't match the product with an ebay category"}
@@ -276,8 +271,6 @@ const createEbayProduct = async (sellerID, productReference) => {
 
     const result = await getReturnPolicies(authToken);
     
-    console.log(result);
-    
     const {returnPolicies} = result;
     
     if(sellerID != 40 && returnPolicies.length > 0)
@@ -286,6 +279,8 @@ const createEbayProduct = async (sellerID, productReference) => {
         returnPolicyId = await createEbayReturnPolicy(authToken);
 
     //create inventory item
+
+    const inventoryAspects = getAspects(ebayCategoryId);
 
     const inventoryResponse = await fetch(`https://api.ebay.com/sell/inventory/v1/inventory_item/${productReference}`,{
         method: "PUT",
@@ -304,14 +299,7 @@ const createEbayProduct = async (sellerID, productReference) => {
             product: {
                 title: matchingProduct.name,
                 description: matchingProduct.description ? matchingProduct.description : "no description",
-                aspects: {
-                    Brand: [
-                        "No brand"
-                    ],
-                    Type: [
-                        "No type"
-                    ],
-                },
+                aspects: inventoryAspects,
                 imageUrls: [
                     imageUrl? imageUrl :`${process.env.REUSE_URL}/img/p/gb-default-large_default.jpg`
                 ]

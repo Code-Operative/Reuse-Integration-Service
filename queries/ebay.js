@@ -316,6 +316,16 @@ const createEbayProduct = async (sellerID, productReference) => {
         inventoryData = await inventoryResponse.json();
 
     console.log(inventoryData);
+
+    if(inventoryData.errors)
+        errors.forEach(error => {
+            console.log(error);
+            if(error.parameters)
+                parameters.forEach(parameter => {
+                    console.log(parameter)
+                })
+        })
+    
     
     //create offer or update offer actually, depending on if there is one for this item id
 

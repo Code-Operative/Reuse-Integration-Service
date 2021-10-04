@@ -282,6 +282,8 @@ const createEbayProduct = async (sellerID, productReference) => {
 
     const inventoryAspects = getAspects(ebayCategoryId);
 
+    console.log(inventoryAspects)
+
     const inventoryResponse = await fetch(`https://api.ebay.com/sell/inventory/v1/inventory_item/${productReference}`,{
         method: "PUT",
         headers: {
